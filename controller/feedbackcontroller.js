@@ -11,7 +11,8 @@ const {
       console.log("addFeedback", req.body);  
       console.log("Uploaded File:", req.file);
   
-      const feedback = req.body;  
+      const feedback = req.body;
+      feedback.module = parseInt(req.body.module);  
   
       if (req.file) {
         feedback.attachment = req.file.path; 
@@ -76,11 +77,12 @@ const {
       console.log("getFeedbackById");
       const result = await getFeedBackById(req.params.id);
       if (result.success) {
-        result.data.forEach(feedback => {
-            if (feedback.attachment) {
-              feedback.attachment = `${process.env.BASE_URL}/${feedback.attachment}`; 
-            }  
-        })
+        // result.data.forEach(feedback => {
+        //     if (feedback.attachment) {
+        //       feedback.attachment = `${process.env.BASE_URL}/${feedback.attachment}`; 
+        //     }  
+        // })
+        result.data.attachment = `${process.env.BASE_URL}/${result.data.attachment}`;
         res.status(200).json({
           message: "Feedback fetched successfully",
           success: true,
@@ -104,7 +106,7 @@ const {
   
   const updateFeedback = async (req, res) => {
     try {
-      console.log("updateFeedback");
+      console.log("updateFeedback",req.body);
       
       const feedback = req.body; 
       

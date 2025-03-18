@@ -1,41 +1,41 @@
 const db = require("../db");
 
 module.exports = {
+  addFeedBack: async (feedback) => {
+    try {
+      console.log(feedback, "feedback");
 
-    addFeedBack: async (feedback) => {
-        try {
+      const exists = await db(process.env.FEED_BACK)
+        .where({
+          title: feedback.title,
+        })
+        .first();
 
-            const exists = await db(process.env.FEED_BACK).where({
-                title: feedback.title,
-                platform: feedback.platform,
-                module: feedback.module,
-            }).first();
-
-            if (exists) {
-                return {
-                    success: false,
-                    data: [],
-                    message: "Feedback already exists",
-                };
-            }
-          const getQuery = await db(process.env.FEED_BACK)
-            .insert(feedback)
-            .returning("id");
-          if (getQuery) {
-            return {
-              success: true,
-              data: getQuery.id,
-            };
-          } else {
-            return {
-              success: false,
-              data: [],
-            };
-          }
-        } catch (error) {
-          throw new Error("Internal server error " + error);
-        }
-      },
+      if (exists) {
+        return {
+          success: false,
+          data: [],
+          message: "Feedback already exists",
+        };
+      }
+      const getQuery = await db(process.env.FEED_BACK)
+        .insert(feedback)
+        .returning("*");
+      if (getQuery) {
+        return {
+          success: true,
+          data: getQuery[0],
+        };
+      } else {
+        return {
+          success: false,
+          data: [],
+        };
+      }
+    } catch (error) {
+      throw new Error("Internal server error " + error);
+    }
+  },
   getAllFeedBack: async () => {
     try {
       const getQuery = await db(process.env.FEED_BACK).where(
@@ -59,11 +59,11 @@ module.exports = {
   },
   getFeedBackById: async (id) => {
     try {
-      const getQuery = await db(process.env.FEED_BACK).where({
+      const getQuery = await db(process.env.FEED_BACK).select("*").where({
         id: id,
         deleted_at: null,
-      });
-      if (getQuery && getQuery.length > 0) {
+      }).first();
+      if (getQuery) {
         return {
           success: true,
           data: getQuery,
@@ -80,13 +80,15 @@ module.exports = {
   },
   updateFeedBack: async (id, feedback) => {
     try {
+      console.log(feedback, "feedback",id);
+      
       const updateQuery = await db(process.env.FEED_BACK)
         .where({ id: id, deleted_at: null })
-        .update(feedback);
+        .update(feedback).returning("*");
       if (updateQuery) {
         return {
           success: true,
-          data: {},
+          data: updateQuery[0],
         };
       } else {
         return {
@@ -105,12 +107,12 @@ module.exports = {
           deleted_at: db.fn.now(),
         })
         .where("id", id);
-        console.log(query,"query");
-        
+      console.log(query, "query");
+
       if (query) {
         return {
           success: true,
-          data: {},
+          data: { id: id },
         };
       } else {
         return {

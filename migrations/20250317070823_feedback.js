@@ -6,7 +6,7 @@ exports.up = function (knex) {
   return knex.schema.createTable("feedback", function (table) {
     table.increments("id").primary();
     table.string("title", 100).notNullable();
-    table.integer("platform").notNullable().comment("1=android,2=ios,3=web");
+    table.string("platform").notNullable().comment("1=android,2=ios,3=web");
     table
       .integer("module")
       .notNullable()
